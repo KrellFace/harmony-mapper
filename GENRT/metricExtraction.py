@@ -1,12 +1,54 @@
 
 import matplotlib.pyplot as plt
+from enum import Enum
 from NRTCompositions import *
+
+class ChordMode(Enum):
+    LYDIAN = 1
+    IONIAN = 2
+    MIXOLYDIAN = 3
+    DORIAN = 4
+    AEOLIAN = 5
+    PHRYGIAN = 6
+    LOCRIAN = 7
 
 def calc_majorchord_ratio(composition):
     comp_episodes = composition.episodes
 
+
+    tot_chords = 0
+    tot_majorchords = 0
     for ep in comp_episodes:
-        ep_melody = ep.melody
+        chord_seq = ep.chord_sequence.chords
+        for chord in chord_seq:
+            tot_chords+=1
+            if(chord.is_major()):
+                tot_majorchords+=1
+
+    return (tot_majorchords/tot_chords)
+
+
+def calc_average_nro_shift(composition):
+
+    total_nro_shift = 0
+    total_chords = 0
+
+    comp_episodes = composition.episodes
+    for ep in comp_episodes:
+        compound_nros = ep.chord_sequence.compound_nros
+        for c in compound_nros:
+            #print(f"C:{c}")
+            if(c!="None"):
+                nro_sequence = c.nros
+                total_chords+=1
+                total_nro_shift+=len(nro_sequence)
+                #print(nro_sequence)
+    
+    return total_nro_shift/total_chords
+
+def calc_chord_mode():
+    return
+
 
 def basic_era_scatter(metric1_name, metric2_name, metric1_vals, metric2_vals, outpath):
 
@@ -35,8 +77,8 @@ def basic_era_scatter(metric1_name, metric2_name, metric1_vals, metric2_vals, ou
                 , c = colors
                 , alpha = 0.4
                 , s = 20)
-    ax.set_xlim(xmin=0.1)
-    ax.set_ylim(ymin=0.4)
+    #ax.set_xlim(xmin=0.1)
+    #ax.set_ylim(ymin=0.4)
     ax.spines['left'].set_color("black")
     ax.spines['left'].set_linewidth(0.5)
     ax.spines['bottom'].set_color("black")
@@ -66,8 +108,8 @@ def generate_and_visualise_songset(track_count_to_generate, episode_specs, outpu
 
         #print(composition)
 
+        """
         episodes = composition.episodes
-
         #Extract average major chord ratio from melody
         tot_chords = 0
         tot_majorchords = 0
@@ -77,16 +119,18 @@ def generate_and_visualise_songset(track_count_to_generate, episode_specs, outpu
                 tot_chords+=1
                 if(chord.is_major()):
                     tot_majorchords+=1
+        """
+        ratio = calc_majorchord_ratio(composition)
 
-        majorratio_dict[i] = (tot_majorchords/tot_chords)
-        majorratios.append(tot_majorchords/tot_chords)
-
-        print(f"For track{i} a total of {tot_chords} chords were generated with {tot_majorchords} being major, giving a major ratio of {(tot_majorchords/tot_chords)}")
+        majorratio_dict[i] = ratio
+        majorratios.append(ratio)
 
         #Extract average bass note shift
         tot_bassnotes = 0
         tot_bassshift = 0
         prev_note = 0
+
+        episodes = composition.episodes
 
         for ep in episodes:
             notes_seq = ep.bassline.notes

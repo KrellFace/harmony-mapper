@@ -163,3 +163,4 @@ cython_debug/
 #Project specific
 
 GENRT/output_tracks/
+*.mid

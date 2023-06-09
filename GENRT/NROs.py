@@ -1,3 +1,4 @@
+#Looks like an NRTEvent is just an NRO with a timestamp, i guess when it should be applied 
 class NRTEvent:
     def __init__(self, compound_nro, timestamp, change_fixed_key=False):
         self.compound_nro = compound_nro
@@ -16,6 +17,8 @@ class NRO:
         return s
 
 
+#ClassicNRO is just an NRO with a major or minor key tag
+#I guess its also only used to store NROs that conform to a certain form too
 class ClassicNRO(NRO):
     def __init__(self, operators, name, major_or_minor):
         self.operators = operators
@@ -41,6 +44,7 @@ class CompoundNRO:
         return f"{operators[0]},{operators[1]},{operators[2]}({id_string})"
 
 
+#Just a standard compound NRO with a string tag 
 class EmotionalCompoundNRO:
     def __init__(self, nro_letters, emotion):
         self.nro_letters = nro_letters
@@ -85,11 +89,19 @@ def get_classic_nro_lists():
     return [maj_nros, min_nros]
 
 
+
+#Generates all NROs in the form of combinations between -2 and 2, with -2 and 2
+#i.e [-2, -2], [-2, -1] etc
 def get_all_nros():
+    #Moves being just numbers between -2 and 2 inclusive 
     moves = range(-2, 3)
     all_nros = [[]]
+    #Loop through 0, 1 & 2
     for rep in range(0, 3):
         new_nros = []
+        #So even though all_nros contains only an empty array on the first loop, that still counts as a thing to loop on
+
+        #print(f"All_nros before loop {all_nros}")
         for nro in all_nros:
             for move in moves:
                 new_nro = nro.copy()

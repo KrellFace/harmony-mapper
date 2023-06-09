@@ -4,6 +4,7 @@ from NRTChordSequences import *
 from NROs import *
 from Chords import *
 import metricExtraction 
+import mapElites
 
 from datetime import *
 import seaborn as sns; sns.set_theme()
@@ -115,18 +116,99 @@ episode2_percussion_spec = NRTPercussionSpec(instrument_nums=[35, 59, 51],
 
 episode1_spec = NRTEpisodeSpec(episode1_chord_spec, episode1_melody_spec, episode1_bass_spec, episode1_percussion_spec)
 episode2_spec = NRTEpisodeSpec(episode2_chord_spec, episode2_melody_spec, episode2_bass_spec, episode2_percussion_spec)
-#composition = NRTComposition([episode1_spec, episode2_spec])
+composition_a = NRTComposition(episode_specs = [episode1_spec])
 
 
+nro_length = len(composition_a.episodes[0].chord_sequence.compound_nros)
+print(f"Generated Track Compound nro length a : {nro_length}")
+
+composition_b = NRTComposition(episode_specs = [episode1_spec])
+nro_length = len(composition_b.episodes[0].chord_sequence.compound_nros)
+print(f"Generated Track Compound nro length b : {nro_length}")
+composition_c = NRTComposition(episode_specs = [episode1_spec])
+
+nro_length = len(composition_c.episodes[0].chord_sequence.compound_nros)
+print(f"Generated Track Compound nro length c : {nro_length}")
+composition_d = NRTComposition(episode_specs = [episode1_spec])
+
+nro_length = len(composition_d.episodes[0].chord_sequence.compound_nros)
+print(f"Generated Track Compound nro length d: {nro_length}")
+
+
+"""
 #composition.chords_on = False
-#composition.melody_on = False
-#composition.bassline_on = False
-#composition.percussion_on = False
+composition_a.melody_on = False
+composition_a.bassline_on = False
+composition_a.percussion_on = False
 
-#composition.save_song("output_tracks/LengthTest3.mid")
+composition_a.save_song("output_tracks/ChordsOnly5.mid")
+
+#avg_nro_shift = metricExtraction.calc_average_nro_shift(composition_a)
+
+#print(f"Avg NRO shift: {avg_nro_shift}")
+
+#Testing creating a track from a track
+extracted_episode = composition_a.episodes[0]
+extracted_specs = composition_a.episode_specs
+
+extracted_chordseq = extracted_episode.chord_sequence
+extracted_duration = extracted_episode.duration_ms
+
+new_episode = NRTEpisode(chord_seq= extracted_chordseq, dur_ms = extracted_duration)
+new_composition = NRTComposition( episodes = [new_episode])
+
+new_composition.melody_on = False
+new_composition.bassline_on = False
+new_composition.percussion_on = False
+
+new_composition.save_song("output_tracks/CopiedTrack5.mid")
+
+print("Pre_mutation compound NROs")
+for nro in extracted_episode.chord_sequence.compound_nros:
+    print(nro)
+#print(extracted_episode.chord_sequence.compound_nros)
+
+mutated_seq = mapElites.mutate_nro_sequence(extracted_episode.chord_sequence.compound_nros)
+
+print("Post mutation compound NROs")
+
+for nro in mutated_seq:
+    print(nro)
+#print(mutated_seq)
+
+print("Pre_mutation Extracted Chord sequence")
+print(str(new_episode.chord_sequence))
+
+mutated_chord_list = mapElites.generate_chord_list_for_new_nros(extracted_chordseq.chords, mutated_seq)
+
+print(extracted_chordseq.tick_durations)
+
+
+mutated_chord_sequence = NRTChordSequence(extracted_chordseq.spec, mutated_chord_list, extracted_duration, extracted_chordseq.tick_durations, mutated_seq)
+
+mutated_episode = NRTEpisode(chord_seq= mutated_chord_sequence, dur_ms = extracted_duration)
+
+print("Post_mutation Extracted Chord sequence")
+print(str(mutated_episode.chord_sequence))
+
+
+mutated_composition = NRTComposition( episodes = [mutated_episode])
+
+mutated_composition.melody_on = False
+mutated_composition.bassline_on = False
+mutated_composition.percussion_on = False
+
+mutated_composition.save_song("output_tracks/MutatedTrack5.mid")
+
+track_fitness = mapElites.calc_fitness_based_on_final_chord(mutated_chord_list[-1],start_chord)
+
+print("New track fitness: " + str(track_fitness))
+
+
 
 #print(composition)
 
+"""
 
 """
 def basic_era_scatter(metric1_name, metric2_name, metric1_vals, metric2_vals, outpath):
@@ -175,25 +257,20 @@ def basic_era_scatter(metric1_name, metric2_name, metric1_vals, metric2_vals, ou
 #Testing multiple track generation and ERA visualisation
 
 
-run_name = "SepFuncTest1"
+#run_name = "SepFuncTest1"
+##track_count_to_generate = 1000
+#out_folder = (f"output_tracks/{run_name}/")
+#try: 
+#    os.mkdir(out_folder) 
+#except OSError as error: 
+#    print(error) 
 
-track_count_to_generate = 1000
+#episode1_spec = NRTEpisodeSpec(episode1_chord_spec, episode1_melody_spec, episode1_bass_spec, episode1_percussion_spec)
+#episode2_spec = NRTEpisodeSpec(episode2_chord_spec, episode2_melody_spec, episode2_bass_spec, episode2_percussion_spec)
 
-out_folder = (f"output_tracks/{run_name}/")
-
-try: 
-    os.mkdir(out_folder) 
-except OSError as error: 
-    print(error) 
-
-
-
-
-episode1_spec = NRTEpisodeSpec(episode1_chord_spec, episode1_melody_spec, episode1_bass_spec, episode1_percussion_spec)
-episode2_spec = NRTEpisodeSpec(episode2_chord_spec, episode2_melody_spec, episode2_bass_spec, episode2_percussion_spec)
+#metricExtraction.generate_and_visualise_songset(track_count_to_generate, [episode1_spec, episode2_spec], out_folder)
 
 
-metricExtraction.generate_and_visualise_songset(track_count_to_generate, [episode1_spec, episode2_spec], out_folder)
 
 """
 majorratio_dict = dict()
@@ -270,14 +347,6 @@ for i in range(track_count_to_generate):
 
     metricExtraction.basic_era_scatter("Major_Chord_Ratio", "Avg Bassnote Shift", majorratios, bassdiffs,out_folder)
 """
-
-
-
-
-
-
-
-
 
 
 #os.system(f"fluidsynth --quiet --no-shell new_song.mid")

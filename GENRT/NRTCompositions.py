@@ -6,28 +6,39 @@ from Midi import *
 
 class NRTComposition:
 
-    def __init__(self, episode_specs):
-        self.episodes = []
-        self.episode_specs = episode_specs
-        self.chords_on = True
-        self.melody_on = True
-        self.bassline_on = True
-        self.percussion_on = True
-        previous_episode = None
-        episode_start_time_ms = 0
+    def __init__(self, episode_specs = [], episodes=[]):
+        #Original method to generate a composition stochastically based on specs
+        if(len(episodes)==0):
+            self.episodes = []
+            self.episode_specs = episode_specs
+            self.chords_on = True
+            self.melody_on = True
+            self.bassline_on = True
+            self.percussion_on = True
+            previous_episode = None
+            episode_start_time_ms = 0
 
-        for ind, episode_spec in enumerate(episode_specs):
-            episode = NRTEpisode(episode_spec)
-            self.episodes.append(episode)
-            episode.first_stage_calculate_music(previous_episode, episode_start_time_ms)
-            episode_start_time_ms += episode.chord_sequence.sequence_duration_ms
-            previous_episode = episode
+            for ind, episode_spec in enumerate(episode_specs):
+                episode = NRTEpisode(episode_spec)
+                self.episodes.append(episode)
+                episode.first_stage_calculate_music(previous_episode, episode_start_time_ms)
+                episode_start_time_ms += episode.chord_sequence.sequence_duration_ms
+                previous_episode = episode
 
-        previous_episode = None
-        for ind, episode in enumerate(self.episodes):
-            next_episode = None if ind >= len(self.episodes) - 1 else self.episodes[ind + 1]
-            episode.second_stage_calculate_music(previous_episode, next_episode)
-            previous_episode = episode
+            previous_episode = None
+            for ind, episode in enumerate(self.episodes):
+                next_episode = None if ind >= len(self.episodes) - 1 else self.episodes[ind + 1]
+                episode.second_stage_calculate_music(previous_episode, next_episode)
+                previous_episode = episode
+        #New method to generate directly from premade episodes
+        else:
+            self.episodes = episodes
+            self.episode_specs = episode_specs
+            self.chords_on = True
+            self.melody_on = True
+            self.bassline_on = True
+            self.percussion_on = True
+
 
     def __str__(self):
         s = ""
@@ -74,13 +85,24 @@ class NRTEpisodeSpec:
 
 class NRTEpisode:
 
-    def __init__(self, spec):
-        self.chord_sequence = None
-        self.melody = None
-        self.bassline = None
-        self.percussion = None
-        self.spec = spec
-        self.duration_ms = 1000
+    def __init__(self, spec=[], chord_seq=None, dur_ms = 1000):
+        
+        if(chord_seq==None):
+            #Original method, generating an episode from a spec
+            self.chord_sequence = None
+            self.melody = None
+            self.bassline = None
+            self.percussion = None
+            self.spec = spec
+            self.duration_ms = 1000
+        #Generate directly from a chord sequence
+        else:
+            self.chord_sequence = chord_seq
+            self.melody = None
+            self.bassline = None
+            self.percussion = None
+            self.spec = None
+            self.duration_ms = dur_ms
 
     def __str__(self):
         return f"{self.chord_sequence}"

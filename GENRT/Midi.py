@@ -27,33 +27,9 @@ class MidiUtils:
         midi_file.tracks.append(MidiTracks.secondary_bass_track)
         midi_file.tracks.extend(MidiTracks.percussion_tracks)
         
-
-        #Attempt at creating the tracks each time
-        """
-        midi_file.tracks.extend([MidiTrack(), MidiTrack(), MidiTrack()])
-        midi_file.tracks.extend([MidiTrack(), MidiTrack(), MidiTrack()])
-        midi_file.tracks.append(MidiTrack())
-        midi_file.tracks.append(MidiTrack())
-        midi_file.tracks.append(MidiTrack())
-        midi_file.tracks.append(MidiTrack())
-        midi_file.tracks.extend([MidiTrack(), MidiTrack(), MidiTrack()])
-        """
-        """
-        #Attempt at new class each time
-        start_tracks = MidiTracks()
-        midi_file.tracks.extend(start_tracks.primary_chord_tracks)
-        midi_file.tracks.extend(start_tracks.secondary_chord_tracks)
-        midi_file.tracks.append(start_tracks.primary_melody_track)
-        midi_file.tracks.append(start_tracks.secondary_melody_track)
-        midi_file.tracks.append(start_tracks.primary_bass_track)
-        midi_file.tracks.append(start_tracks.secondary_bass_track)
-        midi_file.tracks.extend(start_tracks.percussion_tracks)
-        print(f"Midi file length right after track addition: {midi_file.length}")
-        """
-
-
         return midi_file
 
+#This code is weird, shouldnt it just be an enum?
 
 class MidiChannels:
     primary_chord_channel = 0
@@ -74,18 +50,3 @@ class MidiTracks:
     primary_bass_track = MidiTrack()
     secondary_bass_track = MidiTrack()
     percussion_tracks = [MidiTrack(), MidiTrack(), MidiTrack()]
-
-        
-
-
-    """
-    def __init__(self):
-        self.primary_chord_tracks = [MidiTrack(), MidiTrack(), MidiTrack()]
-        self.secondary_chord_tracks = [MidiTrack(), MidiTrack(), MidiTrack()]
-        self.primary_melody_track = MidiTrack()
-        self.secondary_melody_track = MidiTrack()
-        self.primary_bass_track = MidiTrack()
-        self.secondary_bass_track = MidiTrack()
-        self.percussion_tracks = [MidiTrack(), MidiTrack(), MidiTrack()]
-
-    """
