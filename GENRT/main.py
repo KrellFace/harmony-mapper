@@ -22,7 +22,7 @@ secondary_bass_track = 10
 percussion_channel = 9
 
 start_chord = Trichord([48, 52, 55])
-fixed_key = KeySignature("c", "maj")
+fixed_key = KeySignature("C", "maj")
 focal_note = 48
 chord_instrument_num = 48 # harp
 chord_instrument_num2 = 48 # harpsichord
@@ -30,7 +30,7 @@ melody_instrument_num = 42  # blown bottle
 melody_instrument_num2 = 42
 bass_instrument_num = 39 # synth bass
 bass_instrument_num2 = 42
-cmaj = KeySignature("c", "maj")
+cmaj = KeySignature("C", "maj")
 
 event1 = NRTEvent(AntagonismCNRO, 52000, True)
 event2 = NRTEvent(HeroismCNRO, 60000)

@@ -1,7 +1,9 @@
 from mido import Message
 from Midi import *
 
-note_letters = ["a", "a#", "b", "c", "c#", "d", "d#", "e", "f", "f#", "g", "g#"]
+#Making them upper case to match with other code and cause its prettier
+#note_letters = ["a", "a#", "b", "c", "c#", "d", "d#", "e", "f", "f#", "g", "g#"]
+note_letters = ["A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#"]
 major_scale_positions = [0, 2, 4, 5, 7, 9, 11]
 minor_scale_positions = [0, 2, 3, 5, 7, 8, 10]
 
