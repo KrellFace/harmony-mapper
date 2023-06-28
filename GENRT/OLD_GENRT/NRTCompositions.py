@@ -2,7 +2,7 @@ from NRTChordSequences import *
 from NRTMelodies import *
 from NRTBasslines import *
 from NRTPercussion import *
-from Midi import *
+from OLD_GENRT.Midi import *
 
 class NRTComposition:
 

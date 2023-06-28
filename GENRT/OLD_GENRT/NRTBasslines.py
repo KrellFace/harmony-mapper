@@ -1,6 +1,6 @@
 from mido import Message
 from Rhythms import *
-from Midi import *
+from OLD_GENRT.Midi import *
 
 class NRTBasslineSpec:
     def __init__(self, instrument_num, rhythm_string, start_volume, end_volume, episode_overlap_chords):

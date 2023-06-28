@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import re
 from enum import Enum, auto
 from NRTCompositions import *
+from music21 import * 
 
 #Used this page for lots of the mode calculation code
 #https://www.mvanga.com/blog/basic-music-theory-in-200-lines-of-python
@@ -302,7 +303,7 @@ def check_if_trichord_in_scale(trichord, scale):
         if(letter not in scale):
             in_scale = False
 
-    #print(f"Checked if chord {trichord} was in scale {scale} and found {in_scale}")
+    print(f"Checked if chord {trichord} was in scale {scale} and found {in_scale}")
 
     return in_scale
 
@@ -321,13 +322,13 @@ def calc_mode_for_chordlist(composition):
     for chord in chord_list:
         print(f"Checking chord {chord}")
         for key in modes:
-            #print(f"Checking key {key}")
+            print(f"Checking key {key}")
             for mode_in_key in modes[key]:
-                #print(f"Checking mode {mode_in_key}")
+                print(f"Checking mode {mode_in_key} in key {key}")
                 if check_if_trichord_in_scale(chord, modes[key][mode_in_key]):
                     mode_count[mode_in_key]+=1
-                    #print(f"Added to {mode_in_key}. New count: {mode_count[mode_in_key]}")
-        print(f"Chord full processed. New dict: { mode_count}")
+                    print(f"Added to {mode_in_key}. New count: {mode_count[mode_in_key]}")
+        print(f"Chord full processed. New dict: { mode_count}\n\n")
     
     most_frequent_mode = ""
     biggest_count = 0

@@ -1,7 +1,7 @@
 from mido import Message
 from Rhythms import *
-from Chords import *
-from Midi import *
+from OLD_GENRT.Chords import *
+from OLD_GENRT.Midi import *
 import random
 
 

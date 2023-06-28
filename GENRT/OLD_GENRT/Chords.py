@@ -1,5 +1,5 @@
 from mido import Message
-from Midi import *
+from OLD_GENRT.Midi import *
 
 #Making them upper case to match with other code and cause its prettier
 #note_letters = ["a", "a#", "b", "c", "c#", "d", "d#", "e", "f", "f#", "g", "g#"]
@@ -136,6 +136,7 @@ class Trichord:
     
     #Some clunkiness here - not sure why we need to repeatedly call 'mapped_to_majmin_base()'
     #I guess we need to reapply it, because after each NRO shift we may have shifted over the boundary where no loner a<b<c
+    #^This is exactly why
     def apply_compound_nro(self, compound_nro, map_to_majmin=False):
         output_trichord = Trichord(self.notes)
         #print("Applying to compound NRO: " + str(compound_nro))

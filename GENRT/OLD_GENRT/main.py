@@ -2,8 +2,8 @@ import os
 from NRTCompositions import *
 from NRTChordSequences import *
 from NROs import *
-from Chords import *
-import metricExtraction 
+from OLD_GENRT.Chords import *
+import old_metricExtraction 
 import mapElites
 
 from datetime import *

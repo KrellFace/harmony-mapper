@@ -1,6 +1,6 @@
 from mido import Message
 from Rhythms import *
-from Midi import *
+from OLD_GENRT.Midi import *
 
 class NRTPercussionSpec:
     def __init__(self, instrument_nums, rhythm_strings, start_volumes, end_volumes):

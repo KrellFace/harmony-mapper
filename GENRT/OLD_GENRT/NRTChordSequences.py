@@ -1,8 +1,8 @@
 import random
 from NROs import *
-from Chords import *
+from OLD_GENRT.Chords import *
 from Rhythms import *
-from Midi import *
+from OLD_GENRT.Midi import *
 
 
 #The spec holds the requirements for generating a chord sequence 
