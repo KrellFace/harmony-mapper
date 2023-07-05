@@ -288,6 +288,7 @@ def calc_average_nro_shift(cnro_list):
     total_individual_nros = 0
     total_compoud_nros = 0
 
+    #print(f"Calcing NRO shift ond {cnro_list}")
 
     for c in cnro_list:
         #print(f"C:{c}")
@@ -295,6 +296,9 @@ def calc_average_nro_shift(cnro_list):
             total_compoud_nros+=1
             total_individual_nros+=len(c)
             #print(nro_sequence)
+    
+    
+    #print(f"Returning {total_individual_nros/total_compoud_nros}")
     
     return total_individual_nros/total_compoud_nros
 

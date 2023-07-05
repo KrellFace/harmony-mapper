@@ -128,7 +128,8 @@ def apply_compoundnro_to_chord(input_chord, cnro):
             new_numeric_chord.append(n+nro_shift[i])
         #print(f"Premapped chord: {chord.Chord(new_numeric_chord)}")
         remapped_notes = map_numeric_chord_to_root(new_numeric_chord)
-        input_chord = chord.Chord(remapped_notes)
+        d = duration.Duration(2.0)
+        input_chord = chord.Chord(remapped_notes, duration=d)
         #print(f"Postmapped chord: {input_chord}")
 
         """
