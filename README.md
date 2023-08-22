@@ -1,5 +1,5 @@
-# GENRT Procedural Music Generation System
+# Harmony Mapper
 
 
-Developed by Sara Cardinale: https://saracardinalemusic.com/
+Developed by Oliver Withington (owithington.com) and Sara Cardinal (saracardinalemusic.com)
 
