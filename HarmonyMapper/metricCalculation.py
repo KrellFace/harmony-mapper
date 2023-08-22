@@ -2,21 +2,49 @@
 import matplotlib.pyplot as plt
 import re
 from enum import Enum, auto
-from NRTCompositions import *
+import random
 from music21 import * 
+import musicGeneration as musGen
 
 #Used this page for lots of the mode calculation code
 #https://www.mvanga.com/blog/basic-music-theory-in-200-lines-of-python
 #[1] for a citation
+
+
+class MusicModes(Enum):
+    lydian = 1
+    ionian = 2
+    mixolydian = 3
+    dorian = 4
+    aeolian = 5
+    phrygian = 6
+    locrian = 7
+
 major_mode_rotations = {
-    'Ionian':     0,
-    'Dorian':     1,
-    'Phrygian':   2,
-    'Lydian':     3,
-    'Mixolydian': 4,
-    'Aeolian':    5,
-    'Locrian':    6,
+    'ionian':     0,
+    'dorian':     1,
+    'phrygian':   2,
+    'lydian':     3,
+    'mixolydian': 4,
+    'aeolian':    5,
+    'locrian':    6,
 }
+
+major_mode_signature_notes = {
+    'ionian':     3,
+    'dorian':     5,
+    'phrygian':   1,
+    'lydian':     3,
+    'mixolydian': 6,
+    'aeolian':    5,
+    'locrian':    4,
+}
+
+
+class metric_type(Enum):
+    Major_Minor_ChordRatio = auto()
+    Avg_NRO_Shift = auto()
+    Track_Mood = auto()
 
 keys = [
     'B#',  'C', 'C#', 'Db', 'D', 'D#',  'Eb', 'E',  'Fb', 'E#',  'F',
@@ -129,10 +157,6 @@ intervals_major = [
     [ '8',  '#7'],
 ]
 
-class metric_type(Enum):
-    Major_Minor_ChordRatio = auto()
-    Avg_NRO_Shift = auto()
-    Track_Mood = auto()
 
 
 #From [1]
@@ -259,37 +283,34 @@ def generate_modes():
     return modes
 
 
-def calc_majorchord_ratio(composition):
-    comp_episodes = composition.episodes
-
+def calc_majorchord_ratio(chord_seq):
 
     tot_chords = 0
     tot_majorchords = 0
-    for ep in comp_episodes:
-        chord_seq = ep.chord_sequence.chords
-        for chord in chord_seq:
-            tot_chords+=1
-            if(chord.is_major()):
-                tot_majorchords+=1
+    for chord in chord_seq:
+        tot_chords+=1
+        if(chord.isMajorTriad()):
+            tot_majorchords+=1
 
     return (tot_majorchords/tot_chords)
 
 
-def calc_average_nro_shift(composition):
+def calc_average_nro_shift(cnro_list):
 
     total_individual_nros = 0
     total_compoud_nros = 0
 
-    comp_episodes = composition.episodes
-    for ep in comp_episodes:
-        compound_nros = ep.chord_sequence.compound_nros
-        for c in compound_nros:
-            #print(f"C:{c}")
-            if(c!="None"):
-                nro_sequence = c.nros
-                total_compoud_nros+=1
-                total_individual_nros+=len(nro_sequence)
-                #print(nro_sequence)
+    #print(f"Calcing NRO shift ond {cnro_list}")
+
+    for c in cnro_list:
+        #print(f"C:{c}")
+        if(c!="None"):
+            total_compoud_nros+=1
+            total_individual_nros+=len(c)
+            #print(nro_sequence)
+    
+    
+    #print(f"Returning {total_individual_nros/total_compoud_nros}")
     
     return total_individual_nros/total_compoud_nros
 
@@ -303,13 +324,43 @@ def check_if_trichord_in_scale(trichord, scale):
         if(letter not in scale):
             in_scale = False
 
-    print(f"Checked if chord {trichord} was in scale {scale} and found {in_scale}")
+    #print(f"Checked if chord {trichord} was in scale {scale} and found {in_scale}")
 
     return in_scale
 
-def calc_mode_for_chordlist(composition):
+def convert_music21_notename(note):        
+    letter = list(str(note.name)[0:2].replace('-','b'))
+    #print(f"Letter as list: {letter}")
+    if(len(letter)>1):
+        if letter[1] not in ('#','b'):
+            del letter[1]
+    letter = "".join(letter)
+    return letter
 
-    chord_list = composition.episodes[0].chord_sequence.chords
+
+def check_if_music21chord_in_scale(chord, scale):
+
+    in_scale = True
+    for note in chord.notes:
+        letter = convert_music21_notename(note)
+
+        if(letter not in scale):
+            in_scale = False
+
+    #print(f"Checked if chord {chord} was in scale {scale} and found {in_scale}")
+
+    return in_scale
+
+def calc_mode_for_chordlist_revised(chord_seq):
+    track = musGen.chord_seq_to_stream(chord_seq)
+
+    key_str = list(str(track.analyze('key'))[0:2].replace('-','b'))
+    if key_str[0].islower():
+        key_str[0] = key_str[0].upper()
+    if key_str[1] == ' ':
+        del key_str[1]
+    
+    key_str = "".join(key_str)
 
     modes = generate_modes()
 
@@ -317,168 +368,78 @@ def calc_mode_for_chordlist(composition):
     for m in major_mode_rotations:
         mode_count[m]=0
 
-    print(f"Chord list length: {len(chord_list)}")
+    for chord in chord_seq:
+        #print(f"Checking chord {chord}")
+        for mode_in_key in modes[key_str]:
+            #print(f"Checking mode {mode_in_key} in key {key_str}")
+            if check_if_music21chord_in_scale(chord, modes[key_str][mode_in_key]):
+                mode_count[mode_in_key]+=1
+                #print(f"Added to {mode_in_key}. New count: {mode_count[mode_in_key]}")
+        #print(f"Chord full processed. New dict: { mode_count}\n\n")
     
-    for chord in chord_list:
-        print(f"Checking chord {chord}")
-        for key in modes:
-            print(f"Checking key {key}")
-            for mode_in_key in modes[key]:
-                print(f"Checking mode {mode_in_key} in key {key}")
-                if check_if_trichord_in_scale(chord, modes[key][mode_in_key]):
-                    mode_count[mode_in_key]+=1
-                    print(f"Added to {mode_in_key}. New count: {mode_count[mode_in_key]}")
-        print(f"Chord full processed. New dict: { mode_count}\n\n")
-    
-    most_frequent_mode = ""
+    most_frequent_modes = []
     biggest_count = 0
 
     for mode in mode_count:
-        print(f"Chord sequence has {mode_count[mode]} matching scales for  {mode} ")
+        #print(f"Chord sequence has {mode_count[mode]} matching scales for  {mode} ")
         if(mode_count[mode]>biggest_count):
             biggest_count = mode_count[mode]
-            most_frequent_mode = mode
+            most_frequent_modes = [mode]
+        elif(mode_count[mode]==biggest_count):
+            most_frequent_modes.append(mode)
 
-    print(f"Chord sequence fits best with {most_frequent_mode} with {biggest_count} matching scales total")
+    #print(f"Chord sequence fits best with {most_frequent_mode} with {biggest_count} matching scales total")
 
-    return most_frequent_mode
-
-def get_metric_value_for_metric(composition, met_type):
-    if met_type== metric_type.Avg_NRO_Shift:
-        return calc_average_nro_shift(composition)
-    elif met_type == metric_type.Major_Minor_ChordRatio:
-        return calc_majorchord_ratio(composition)
-    elif met_type == metric_type.Track_Mood:
-        return calc_mode_for_chordlist(composition)
-
-
-
-def basic_era_scatter(metric1_name, metric2_name, metric1_vals, metric2_vals, outpath):
-
-    fig = plt.figure(figsize = (8,8))
-    ax = fig.add_subplot(1,1,1) 
-    
-    ax.set_xlabel(metric1_name, fontsize = 35)
-    ax.set_ylabel(metric2_name, fontsize = 35)
+    if(len(most_frequent_modes) == 1):
         
-    title = f"{metric1_name}-{metric2_name} ERA Scatterplot"
-
-
-    #Color each generators points differently if we are running for multiple alternatives
-    colors = []
-
-    for i in range(len(metric1_vals)):
-        #Gen random colors
-        #colors.append('#%06X' % randint(0, 0xFFFFFF))
-        #All pink
-        #colors.append([255/ 255.0, 205/ 255.0, 243/ 255.0])
-        #All purple
-        colors.append([129/ 255.0, 38/ 255.0, 192/ 255.0])
-
-    ax.scatter(metric1_vals
-                , metric2_vals
-                , c = colors
-                , alpha = 0.4
-                , s = 20)
-    #ax.set_xlim(xmin=0.1)
-    #ax.set_ylim(ymin=0.4)
-    ax.spines['left'].set_color("black")
-    ax.spines['left'].set_linewidth(0.5)
-    ax.spines['bottom'].set_color("black")
-    ax.spines['bottom'].set_linewidth(0.5)
-    ax.grid(color = "black", linestyle = "dashed", linewidth = 0.1)
-    ax.set_facecolor((1.0, 1.0,1.0))
-
-    #plt.show()
-    
-    plt.savefig(f"{outpath}{metric1_name},{metric2_name} ERA Scatterplot")
-
-
-def generate_and_visualise_songset(track_count_to_generate, episode_specs, output_folder):
-
-    majorratio_dict = dict()
-    bassdiff_dict = dict()
-    majorratios = list()
-    bassdiffs = list()
-    tracks_dict = dict()
-
-    for i in range(track_count_to_generate):
-        #episode1_spec = NRTEpisodeSpec(episode1_chord_spec, episode1_melody_spec, episode1_bass_spec, episode1_percussion_spec)
-        #episode2_spec = NRTEpisodeSpec(episode2_chord_spec, episode2_melody_spec, episode2_bass_spec, episode2_percussion_spec)
-        composition = NRTComposition(episode_specs)
-
-        tracks_dict[i] = composition
-
-        #print(composition)
-
-        """
-        episodes = composition.episodes
-        #Extract average major chord ratio from melody
-        tot_chords = 0
-        tot_majorchords = 0
-        for ep in episodes:
-            chord_seq = ep.chord_sequence.chords
+        return MusicModes[most_frequent_modes[0]].value
+    #If no matching scales found, return Ionian for now (HACk)
+    elif(biggest_count==0):
+        return MusicModes['ionian'].value
+    elif(len(most_frequent_modes)>0):
+        #print(f"Tie breaker as most freq : {mode_count}")
+        #print(f"Most freq modes : {most_frequent_modes}")
+        max_sig_note_count = 0
+        return_mode= None
+        return_sig_note = None
+        for mode in most_frequent_modes:
+            count = 0
+            signature_note = modes[key_str][mode][major_mode_signature_notes[mode]]
+            #print(f"Signature note: {signature_note} for mode {mode} in key {key_str}")
             for chord in chord_seq:
-                tot_chords+=1
-                if(chord.is_major()):
-                    tot_majorchords+=1
-        """
-        ratio = calc_majorchord_ratio(composition)
+                for note in chord.notes:
+                    if signature_note == convert_music21_notename(note):
+                        count+=1
+            if(count>max_sig_note_count):
+                return_mode = mode
+                max_sig_note_count=count
+                return_sig_note= signature_note
+        
+        #print(f"Returning mode {return_mode} as {max_sig_note_count} signature notes for key {key_str} ({return_sig_note}) found")
+        #print(f"For chord list: ")
+        #for c in chord_seq:
+        #   print(c)
 
-        majorratio_dict[i] = ratio
-        majorratios.append(ratio)
-
-        #Extract average bass note shift
-        tot_bassnotes = 0
-        tot_bassshift = 0
-        prev_note = 0
-
-        episodes = composition.episodes
-
-        for ep in episodes:
-            notes_seq = ep.bassline.notes
-            prev_note=notes_seq[0].note_num
-            for note in notes_seq:
-                #print(f"For track {i} bass note {note.note_num} found next")
-                tot_bassnotes+=1
-                tot_bassshift +=abs(prev_note-note.note_num)
-                prev_note = note.note_num
-
-        bassdiff_dict[i] = (tot_bassshift/tot_bassnotes)
-        bassdiffs.append(tot_bassshift/tot_bassnotes)
-
-        print(f"For track{i} a total of {tot_bassnotes} bass notes were generated with a total bass shift of {tot_bassshift} and average note shift between notes of {(tot_bassshift/tot_bassnotes)}")
-
-    #Saving the most extreme tracks
-    min_val = 999
-    min_key = 0
-    max_val = 0
-    max_key = 0
-    for key in majorratio_dict.keys():
-        val = majorratio_dict[key]
-        if(val<min_val):
-            min_val = val
-            min_key = key
-
-        if(val>max_val):
-            max_val = val
-            max_key = key
-
-    #print(f"Min Key, Max Key: {min_key}, {max_key}")
-
-    tracks_dict[min_key].save_song(output_folder+"/MinMajorRatio.mid")
-    tracks_dict[max_key].save_song(output_folder+"/MaxMajorRatio.mid")
+        if(max_sig_note_count>0):
+            return MusicModes[return_mode].value
+        #Return a random choice of matching modes if no signature note appears most
+        else:
+            return MusicModes[random.choice(most_frequent_modes)].value
 
 
-    basic_era_scatter("Major_Chord_Ratio", "Avg Bassnote Shift", majorratios, bassdiffs,output_folder)
+    
+    else:
+        return -1
 
-
-
+def get_metric_value_for_metric(track, met_type):
+    if met_type== metric_type.Avg_NRO_Shift:
+        return calc_average_nro_shift(track.cnro_seq)
+    elif met_type == metric_type.Major_Minor_ChordRatio:
+        return calc_majorchord_ratio(track.chord_seq)
+    elif met_type == metric_type.Track_Mood:
+        #return calc_mode_for_chordlist(track.chord_seq)
+        return calc_mode_for_chordlist_revised(track.chord_seq)
 
 
 if __name__ == "__main__":
-
-    modes = generate_modes()
-
-    print(modes['C'])
-
+    ""

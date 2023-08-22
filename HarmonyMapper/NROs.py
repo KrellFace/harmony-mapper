@@ -1,4 +1,4 @@
-#Looks like an NRTEvent is just an NRO with a timestamp, i guess when it should be applied 
+
 class NRTEvent:
     def __init__(self, compound_nro, timestamp, change_fixed_key=False):
         self.compound_nro = compound_nro
@@ -16,9 +16,6 @@ class NRO:
             s += f"({self.name})"
         return s
 
-
-#ClassicNRO is just an NRO with a major or minor key tag
-#I guess its also only used to store NROs that conform to a certain form too
 class ClassicNRO(NRO):
     def __init__(self, operators, name, major_or_minor):
         self.operators = operators
@@ -63,19 +60,6 @@ Mmaj_NRO = ClassicNRO([-2, -2, 0], "M", "maj")
 Mmin_NRO = ClassicNRO([0, 2, 2], "M", "min")
 Smaj_NRO = ClassicNRO([1, 0, 1], "S", "maj")
 Smin_NRO = ClassicNRO([-1, 0, -1], "S", "min")
-
-AntagonismCNRO = EmotionalCompoundNRO("LP", "antagonism")
-SorrowCNRO = EmotionalCompoundNRO("L", "sorrow")
-RomanceCNRO = EmotionalCompoundNRO("N", "romance")
-ThreatCNRO = EmotionalCompoundNRO("PRPR", "threat")
-WondermentCNRO = EmotionalCompoundNRO("RL", "wonderment")
-MysteryCNRO = EmotionalCompoundNRO("NRL", "mystery")
-HeroismCNRO = EmotionalCompoundNRO("RLRL", "heroism")
-FantasyCNRO = EmotionalCompoundNRO("NR", "fantastical")
-LifeAndDeathCNRO = EmotionalCompoundNRO("S", "life and death")
-
-emotional_cnros = [AntagonismCNRO, SorrowCNRO, RomanceCNRO, ThreatCNRO, WondermentCNRO,
-                   MysteryCNRO, HeroismCNRO, FantasyCNRO, LifeAndDeathCNRO]
 
 
 def get_classic_nro_lists():

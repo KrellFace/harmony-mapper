@@ -6,7 +6,6 @@ import os
 import pandas as pd
 from enum import Enum
 from NROs import *
-from OLD_GENRT.Chords import *
 import numpy as np
 from datetime import datetime
 import metricCalculation as metCalc
@@ -57,7 +56,7 @@ def get_location_for_track(value_a, value_b, buckets_a, buckets_b):
 
     counter = 0
     for b in buckets_a:
-        if(value_a<b[1]):
+        if(value_a<=b[1]):
             a_index=counter
             a_loc_found= True
             break
@@ -65,7 +64,7 @@ def get_location_for_track(value_a, value_b, buckets_a, buckets_b):
     
     counter = 0
     for b in buckets_b:
-        if(value_b<b[1]):
+        if(value_b<=b[1]):
             b_index=counter
             b_loc_found= True
             break
@@ -92,11 +91,6 @@ def select_random_track_from_grid(grid):
 
 #Replace an NRO in a sequence with a random one
 def mutate_nro_sequence(nro_sequence, max_length, mut_chance):
-    """
-    random_nro = musGen.generate_random_compound_nro(max_length)
-    nro_sequence[random.randrange(len(nro_sequence))] = random_nro
-    return nro_sequence
-    """
     for i, cnro in enumerate(nro_sequence):
         if(random.uniform(0,1)<mut_chance):
             nro_sequence[i] = musGen.generate_random_compound_nro(max_length)
@@ -112,8 +106,6 @@ def crossover_nro_sequence(seq1, seq2):
 
 def calc_fitness_based_on_final_chord(final_chord, target_chord):
 
-    #print(f"Final chord: {final_chord}")
-    #print(f"Target chord: {target_chord}")
 
     final_numeric = musGen.convert_music21chord_to_numeric(final_chord)
     target_numeric = musGen.convert_music21chord_to_numeric(target_chord)
@@ -123,7 +115,6 @@ def calc_fitness_based_on_final_chord(final_chord, target_chord):
     for i, note in enumerate(final_numeric):
         diff+=abs(note-target_numeric[i])
 
-    #print(f"Calced fitness diff: {diff}")
 
     if diff!=0:
         return 1/diff
@@ -134,17 +125,6 @@ def calc_fitness_based_on_key_confidence(track):
     return track.stream.analyze('key').correlationCoefficient
 
 def calc_track_fitness(track, target_chord):
-    """"
-    if(track.is_complete_track):
-        return calc_fitness_based_on_final_chord(track.chord_seq[-1], target_chord)
-    else:
-        return 0
-    """
-    """
-    fitness = 1/abs(len(track.chord_seq)-10)
-    #print(f"Track fitness {fitness} for chord_seq: {track.chord_seq}")
-    return fitness
-    """
     contains_duplicates = False
     prev_chord = None
     for chord in track.chord_seq:
@@ -155,7 +135,6 @@ def calc_track_fitness(track, target_chord):
     if contains_duplicates:
         return 0
     else:
-        #return calc_fitness_based_on_final_chord(track.chord_seq[-1], target_chord)
         return calc_fitness_based_on_key_confidence(track)
 
 def add_track_to_grid(map, start_chord, new_track, buckets_a, buckets_b, target_chord):
@@ -165,17 +144,11 @@ def add_track_to_grid(map, start_chord, new_track, buckets_a, buckets_b, target_
         cached_comp_index = -1
         worst_fitness_found = 1
         for index, t in enumerate(map[position]):
-            #final_chord =  composition.episodes[-1].chord_sequence.chords[-1]
-            #final_chord = t.chord_seq[-1]
-            #fitness = calc_fitness_based_on_final_chord(final_chord, target_chord)
             fitness = calc_track_fitness(t, target_chord)
             if(fitness<worst_fitness_found):
                 worst_fitness_found = fitness
                 cached_comp_index = index
         
-        #new_track_final_chord =  new_composition.episodes[-1].chord_sequence.chords[-1]
-        #new_track_final_chord = new_track.chord_seq[-1]
-        #new_track_fitness = calc_fitness_based_on_final_chord(new_track_final_chord, target_chord)
         new_track_fitness= calc_track_fitness(new_track, target_chord)
         if(new_track_fitness>worst_fitness_found):
             #print(f"Removing track with fitness {worst_fitness_found} with track with fitness {new_track_fitness}")
@@ -192,7 +165,6 @@ def generate_starting_population(start_chord, size, track_length, metric_a, metr
     for i in range(size):
         rand_nro_seq = musGen.generate_random_compound_nro_sequence(track_length, max_cnro_length)
         start_pop.append(mt.musicTrack(start_chord, rand_nro_seq, metric_a, metric_b))
-        #start_pop.append(musGen.generate_chord_seq_from_cnro_list(start_chord, nro_seq))
 
     
     return start_pop
@@ -213,8 +185,6 @@ def evaluate_map(map,start_chord, target_chord, a_size, b_size, print_file = Fal
             filled_cells+=1
 
             for track in x:
-                #final_chord =  track.chord_seq[-1]
-                #fitness = calc_fitness_based_on_final_chord(final_chord, target_chord)
                 fitness = calc_track_fitness(track, target_chord)
                 if(fitness>max_cell_fitness):
                     max_cell_fitness = fitness
@@ -243,9 +213,6 @@ def evaluate_map(map,start_chord, target_chord, a_size, b_size, print_file = Fal
     return max_fit_matrix, total_pop, filled_cells, average_grid_fitness
 
 def generate_songs_from_map(map, target_chord, output_folder, buckets_a, buckets_b, fit_only= True):
-    #outpath = 'output_folder/'+output_folder+"/"
-    #if not os.path.exists(output_folder):
-    #    os.makedirs(outpath)
     
     for k in map:
         if(len(map[k])>0):
@@ -259,7 +226,6 @@ def generate_songs_from_map(map, target_chord, output_folder, buckets_a, buckets
                 for track in map[k]:
                     
                     #final_chord =  track.chord_seq[-1]
-                    #fitness = calc_fitness_based_on_final_chord(final_chord, target_chord)
                     fitness = calc_track_fitness(track, target_chord)
                     if fitness == 1 or not fit_only:
                         s = musGen.chord_seq_to_stream(track.chord_seq)
@@ -300,11 +266,9 @@ def generate_songs_from_map(map, target_chord, output_folder, buckets_a, buckets
                     counter+=1
             
 
-#def generate_map_cell_stats(cell, output_file_name)
-
 def get_buckets_for_metric(metric):
     if metric== metCalc.metric_type.Avg_NRO_Shift:
-        return  generate_buckets(.9, 5.1, 10)
+        return  generate_buckets(1, 5, 10)
     elif metric == metCalc.metric_type.Major_Minor_ChordRatio:
         return generate_buckets(0,1,10)
     elif metric == metCalc.metric_type.Track_Mood:
@@ -343,8 +307,7 @@ def map_elites_run(iteration_count, start_chord, target_chord, run_name, track_l
         f.write(f"MetricA buckets: {a_buckets}\n")
         f.write(f"MetricB buckets: {b_buckets}\n\n")
         f.write(f"Mutation Rate: {mut_chance}\n")
-        f.write(f"Mutation Rate: {cross_chance}\n")
-
+        f.write(f"Crossover Rate: {cross_chance}\n")
 
     
     for track in start_pop:
@@ -352,7 +315,6 @@ def map_elites_run(iteration_count, start_chord, target_chord, run_name, track_l
 
     #print(map)
     map_stats_over_time = []
-
 
 
     print("Starting pop map details:")
@@ -366,16 +328,12 @@ def map_elites_run(iteration_count, start_chord, target_chord, run_name, track_l
         generate_map_heatmap(max_fit_matrix, a_buckets,b_buckets, "Initial Pop Heatmap", output_folder+"/InitialPopHeatmap.png")
 
     for i in range(0, iteration_count):
-        #rand_comp_cnro_seq1 = select_random_track_from_grid(map).cnro_seq
-        #rand_comp_cnro_seq2 = select_random_track_from_grid(map).cnro_seq
         rand_comp_cnro_seq1 = select_random_track_from_grid(map).get_cnro_seq()
         rand_comp_cnro_seq2 = select_random_track_from_grid(map).get_cnro_seq()
         #print(f"Premutation selected seq: {rand_comp_cnro_seq1}")
 
-        #if(random.uniform(0,1)<mut_chance):
         mut_cnro_seq1 = mutate_nro_sequence(rand_comp_cnro_seq1, max_cnro_length, mut_chance)
         
-        #if(random.uniform(0,1)<mut_chance):
         mut_cnro_seq2 = mutate_nro_sequence(rand_comp_cnro_seq2, max_cnro_length, mut_chance)
 
         if(random.uniform(0,1)<cross_chance):
@@ -386,9 +344,6 @@ def map_elites_run(iteration_count, start_chord, target_chord, run_name, track_l
 
         add_track_to_grid(map,start_chord,new_track1, a_buckets, b_buckets, target_chord)
         add_track_to_grid(map,start_chord,new_track2, a_buckets, b_buckets, target_chord)
-
-        #print(f"Postmut selected seq (should be the same): {rand_comp_cnro_seq1}")
-
 
         if(i%100==0):
             print("Map at loop " + str(i))
@@ -428,11 +383,11 @@ def generate_map_heatmap(fit_matrix, buckets_a, buckets_b, plot_title, file_name
 
     if(len(col_names_a)==0):
         for bucket in buckets_a:
-            col_names_a.append(round(bucket[0],2))
+            col_names_a.append(f"{round(bucket[0],2)} to {round(bucket[1],2)}")
 
     if(len(row_names_b)==0):
         for bucket in buckets_b:
-            row_names_b.append(round(bucket[0],2))
+            row_names_b.append(f"{round(bucket[0],2)} to {round(bucket[1],2)}")
 
     df_cm = pd.DataFrame(fit_matrix, index = col_names_a,
                     columns = row_names_b)
@@ -441,11 +396,9 @@ def generate_map_heatmap(fit_matrix, buckets_a, buckets_b, plot_title, file_name
     plt.title(plot_title)
     #plt.show()
 
-    #fig = hexplot.fig
     fig = ax.get_figure()
-    fig.savefig(file_name) 
+    fig.savefig(file_name,dpi=300, bbox_inches="tight") 
     
-    #plt.savefig(file_name,dpi=300, bbox_inches="tight")
     plt.close()
     return
 
@@ -453,9 +406,9 @@ if __name__ == "__main__":
     print("Start")
     overall_start_time = datetime.now()
 
-    map_elites_run(1000, CMAJ, CMAJ, "1k20LengthKeyConfd", 20, metCalc.metric_type.Track_Mood,metCalc.metric_type.Avg_NRO_Shift,  0.1, 0.5, False, 5)
+    map_elites_run(100, CMAJ, CMAJ, "TestStillWorks", 20, metCalc.metric_type.Track_Mood,metCalc.metric_type.Avg_NRO_Shift,  .2, .5, False, 5)
 
-    
+    #".2.5-5kFinalRunV2-NewSig"
     runtime_seconds=  datetime.now () -overall_start_time
     runtime_minutes = runtime_seconds/60
     print("Total Runtime: " + str(runtime_minutes) + " minutes")

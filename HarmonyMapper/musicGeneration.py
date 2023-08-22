@@ -91,19 +91,6 @@ def get_classic_nro_from_letter_and_mode(letter, mode):
         print("Faulty request for NRO made")
         return 
 
-
-"""
-def apply_nro_to_numeric_chord(n_chord, nro):
-    notes = []
-    for ind, operator in enumerate(nro.operators):
-        notes.append(n_chord[ind] + operator)
-    #remapped_notes = remap_numeric_chord(notes)
-    #print(f"Premapping notes: {chord.Chord(notes)}")
-    remapped_notes = map_numeric_chord_to_root(notes)
-    #print(f"Root chord notes: {chord.Chord(remapped_notes)}")
-    return remapped_notes
-"""
-
 def apply_compoundnro_to_chord(input_chord, cnro):
     #notes = n_chord
     succeeded = True
@@ -118,11 +105,7 @@ def apply_compoundnro_to_chord(input_chord, cnro):
         
         #print(F"Retrieved nroshift: {nro_shift}, for letter {nro} and mode {input_chord.isMajorTriad()}")
 
-        #new_chord = apply_letter_nro_to_chord(input_chord, nro)
-        #numeric_form = convert_music21chord_to_numeric(new_chord)
         numeric_form = convert_music21chord_to_numeric(input_chord)
-        #print(input_chord)
-        #print(numeric_form)
         new_numeric_chord = []
         for i, n in enumerate(numeric_form):
             new_numeric_chord.append(n+nro_shift[i])
@@ -132,50 +115,12 @@ def apply_compoundnro_to_chord(input_chord, cnro):
         input_chord = chord.Chord(remapped_notes, duration=d)
         #print(f"Postmapped chord: {input_chord}")
 
-        """
-        if(len(notes)==0):
-            #print("Chord could not be mapped to root. Discarding")
-            succeeded= False
-            break
-        """
-
         #print(f"New Intermediary Chord: {chord.Chord(notes)} from nro {nro}")
 
     
     return input_chord, succeeded
 
-"""
-def apply_letter_nro_to_chord(c, letter):
-    print(c)
-    print(c.isMajorTriad())
-    new_chord = None
-    if letter == 'R':
-        new_chord=  analysis.neoRiemannian.R(c)
-    elif letter == 'P':
-        new_chord=   analysis.neoRiemannian.P(c)
-    elif letter == 'L':
-        new_chord=   analysis.neoRiemannian.L(c)
-    elif letter == 'N':
-        new_chord=   analysis.neoRiemannian.N(c)
-    elif letter == 'S':
-        new_chord=   analysis.neoRiemannian.S(c)
-    return new_chord
-"""
-    
 def generate_random_compound_nro(max_cnro_length, classic_only = True):
-    """
-    all_nros = []
-    if(not classic_only):
-        all_nros = NROs.get_all_nros()
-    else:
-        all_nros = NROs.classic_nros
-
-    c_nro_length = random.randint(1, max_cnro_length)
-    nros = []
-    for j in range(c_nro_length):
-        nros.append(random.choice(all_nros))
-    return nros
-    """
     all_nros = ['R', 'P', 'L', 'N', 'S', 'M']
     c_nro_length = random.randint(1, max_cnro_length)
     nro_letters = []
@@ -183,24 +128,12 @@ def generate_random_compound_nro(max_cnro_length, classic_only = True):
         nro_letters.append(random.choice(all_nros))
     return nro_letters
 
-"""
-def get_final_chord_from_cnro_seq(start_chord, cnroseq):
-    return generate_chord_seq_from_cnro_list(start_chord,cnroseq)[-1]
-"""
-    
 def generate_random_compound_nro_sequence(count, max_cnro_length):
 
     output_c_nros = []
 
     for i in range(count):
         output_c_nros.append(generate_random_compound_nro(max_cnro_length))
-        """
-        c_nro_length = random.randint(0, max_cro_length+1)
-        nros = []
-        for j in range(c_nro_length):
-            nros.append(random.choice(all_nros))
-        output_c_nros.append(NROs.CompoundNRO(nros))
-        """
     return output_c_nros
 
 
@@ -213,11 +146,6 @@ def generate_chord_seq_from_cnro_list(start_chord, c_nro_list):
     #print(start_chord)
 
     for cnro in c_nro_list:
-        #print(f"Applying CNRO to {chord_list[-1]}")
-        #prev_n_chord = convert_music21chord_to_numeric(chord_list[-1])
-        #print(f"Applying CNRO to {prev_n_chord}")
-        #next_n_chord, success = apply_compoundnro_to_chord(prev_n_chord, cnro)
-        #print(chord_list[-1])
         nextchord, success = apply_compoundnro_to_chord(chord_list[-1], cnro)
         if(success):
             #print(f"Generated: {next_n_chord}")
@@ -228,21 +156,6 @@ def generate_chord_seq_from_cnro_list(start_chord, c_nro_list):
             break
     
     return chord_list, success
-
-"""
-def map_numericchord_to_mid_octave(numeric_chord):
-    mapped_chord = []
-    for note in numeric_chord:
-        try_note = note + (12 * 5)
-        mapped_note = note
-        while try_note > 0:
-            if try_note >= 60 and try_note < 72:
-                mapped_note = try_note
-            try_note -= 12
-        mapped_chord.append(mapped_note)
-    mapped_chord.sort()
-    return mapped_chord
-"""
 
 def map_numeric_chord_to_root(numeric_chord):
     #mid_octave_ver = map_numericchord_to_mid_octave(numeric_chord)
@@ -296,47 +209,7 @@ def map_numeric_chord_to_root(numeric_chord):
             root_form_notes.append(numeric_chord[root_pos.index(4)])
     
     return root_form_notes
-    """
-    a, b, c = mid_octave_ver
-    mapped_notes = []
-    for t1, t2, t3 in [[a, b, c], [c - 12, a, b], [b - 12, c - 12, a]]:
-        if t2 - t1 == 3 and t3 - t2 == 4:
-            mapped_notes = [t1, t2, t3]
-            break
-        if t2 - t1 == 4 and t3 - t2 == 3:
-            mapped_notes = [t1, t2, t3]
-            break
-    return mapped_notes
-    """
 
-"""
-def remap_numeric_chord(numeric_chord):
-
-    #print(f"Resorting numeric chord: {numeric_chord}")
-    ident_dict = dict()
-    for i, note in enumerate(numeric_chord):
-        pos_indentifier = (note+4)%12
-        #ident_dict[pos_indentifier] = i
-        ident_dict[i] = pos_indentifier
-    
-    #print(f"Ident dict: {ident_dict}")
-    key_list = list(ident_dict.keys())
-    val_list = list(ident_dict.values())
-
-    #sorted_keys = sorted(ident_dict)
-    sorted_values = sorted(val_list)
-    output_numeric_chord = []
-
-    #print(f"Ident dict sorted values: {sorted_keys}")
-    #print(f"Ident dict sorted values: {sorted_values}")
-
-    for val in sorted_values:
-        #output_numeric_chord.append(numeric_chord[ident_dict[val]])
-        output_numeric_chord.append(numeric_chord[key_list[val_list.index(val)]])
-    #print(f"Final sorted chord: {output_numeric_chord}")
-    
-    return output_numeric_chord
-"""
 
 if __name__ == "__main__":
 
@@ -369,66 +242,3 @@ if __name__ == "__main__":
     letter = ays.tonicPitchNameWithCase
     key_signature = ays.asKey(tonic=letter)
 
-    #Print track info
-    print(f"Track Key:{ays}")
-    print(f"Track Key String Raw:{str(ays)[0:2]}")
-    key_str = list(str(track.analyze('key'))[0:2].replace('-','b'))
-    if key_str[0].islower():
-        key_str[0] = key_str[0].upper()
-    print(key_str[1])
-    if key_str[1] == ' ':
-        del key_str[1]
-    print(f"Track Key String Revised:{key_str}")
-    
-    print(f"Correlation Coefficient:{ays.correlationCoefficient}")
-    print(f"Tonal Certainty:{ays.tonalCertainty()}")
-    print(f"Alt Interpretations:{ays.alternateInterpretations[0:4]}")
-    
-    print(f"Key tonic: {ays.tonicPitchNameWithCase}")
-    print(f"Mode: {key_signature}")
-    print(f"Mode Only: {key_signature.mode}")
-
-    #print(metCalc.calc_mode_ford_chordlist_revised(chord_seq))
-
-    #me.calc_fitness_based_on_final_chord(chord_seq[-1],c_maj)
-
-    #track.show('midi')
-
-    """
-    f= generate_random_note(3,5)
-    print(f)
-    f.show('midi')
-    """
-
-    """
-    c = generate_random_trichord(1,6)
-    print(c)
-    c.show('midi')
-    """
-
-    """
-    c = generate_random_trichord(1,6)
-    print(c)
-    print(convert_music21chord_to_numeric(c))
-    c.show('midi')
-    """
-
-    """
-    s = generate_random_track(3,5, 20)
-    print(s)
-    s.show('midi')
-    
-    details = get_key_and_confidence_from_stream(s)
-    print(details)
-    print(details.correlationCoefficient)
-    print(details.mode)
-
-
-    output_folder = f"{os.getcwd()}/{run_name}/"
-
-    if not os.path.exists(output_folder):
-        # If it doesn't exist, create it
-        os.makedirs(output_folder)
-
-    save_stream_to_midi(s, output_folder+"TestTrack.mid")
-    """
