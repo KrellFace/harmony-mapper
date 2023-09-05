@@ -235,40 +235,6 @@ def make_intervals(key, interval_type='standard'):
 
 
 #From [1]
-def make_intervals_standard(key):
-    # Our labeled set of notes mapping interval names to notes
-    labels = {}
-    
-    # Step 1: Generate a chromatic scale in our desired key
-    chromatic_scale = chromatic(key)
-    
-    # The alphabets starting at provided key's alphabet
-    alphabet_key = rotate(alphabet, find_note_index(alphabet, key[0]))
-    
-    # Iterate through all intervals (list of lists)
-    for index, interval_list in enumerate(intervals):
-    
-        # Step 2: Find the notes to search through based on degree
-        notes_to_search = chromatic_scale[index % len(chromatic_scale)]
-        
-        for interval_name in interval_list:
-            # Get the interval degree
-            degree = int(interval_name[1]) - 1 # e.g. M3 --> 3, m7 --> 7
-            
-            # Get the alphabet to look for
-            alphabet_to_search = alphabet_key[degree % len(alphabet_key)]
-            
-            try:
-                note = [x for x in notes_to_search if x[0] == alphabet_to_search][0]
-            except:
-                note = notes_to_search[0]
-            
-            labels[interval_name] = note
-
-    return labels
-
-
-#From [1]
 def generate_modes():
     modes = {}
     for key in keys:

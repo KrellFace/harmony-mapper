@@ -2,14 +2,11 @@ from music21 import *
 import random
 import os
 from enum import Enum
-import NROs
 import mapElites as me
 import metricCalculation as metCalc
 
 note_letters = ['A','B','C','D','E','F','G']
 
-
-run_name = "TestFold"
 
 def generate_random_note(min_octave, max_octave):
 
@@ -28,6 +25,17 @@ def generate_random_trichord(min_octave, max_octave):
     n2 = generate_random_note(min_octave,max_octave)
     n3 = generate_random_note(min_octave,max_octave)
     return chord.Chord([n1, n2, n3])
+
+
+def generate_random_admissable_chord(min_midi_root, max_midi_root):
+    notes = []
+    root_note = random.randint(min_midi_root, max_midi_root+1)
+    
+    if random.random() >0.5:
+        notes.extend([root_note, root_note+4, root_note+7])
+    else:
+        notes.extend([root_note, root_note+3, root_note+7])
+    return notes
 
 
 
@@ -172,8 +180,6 @@ def map_numeric_chord_to_root(numeric_chord):
     for n in scale_pos:
         root_pos.append(n-min_val)
     
-    #If the root chord form bridges an octave, it can be in the form 5, 8, 0(12) or 5, 9, 0(12)
-    
     maj1 =  all(item in root_pos for item in [0,4,7])
     maj2 =  all(item in root_pos for item in [5,9,0])
     maj3 =  all(item in root_pos for item in [8,0,3])
@@ -213,32 +219,5 @@ def map_numeric_chord_to_root(numeric_chord):
 
 if __name__ == "__main__":
 
-    #Generate a random track starting at C Major
-    c_maj = chord.Chord(["C2","E4","G6"])
-    print(c_maj)
-    
-    cnro_seq = generate_random_compound_nro_sequence(10, 1)
-    chord_seq, success = generate_chord_seq_from_cnro_list(c_maj, cnro_seq)
-
-    #Print the chords
-    print("Chords in track:")
-    for c in chord_seq:
-        sorted = c.sortDiatonicAscending()
-        print(sorted)
-        print(sorted.notes)
-
-    #Print the NROs
-    
-    print("CNROs in track:")
-    for i, cn in enumerate(cnro_seq):
-        print(f"CNRO {i}")
-        for nro in cn:
-            print(nro)
-    
-
-    #Generate track and analyse
-    track = chord_seq_to_stream(chord_seq)
-    ays = track.analyze('key')
-    letter = ays.tonicPitchNameWithCase
-    key_signature = ays.asKey(tonic=letter)
+   ""
 
